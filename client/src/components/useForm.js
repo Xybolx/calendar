@@ -18,7 +18,8 @@ const useForm = () => {
     };
 
     return {
-      values, 
+      values,
+      setValues, 
       handleChange,  
       handleClearForm
     };

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import API from '../utils/API';
 import moment from 'moment';
 
-const useArtyomCommands = (artyomInstance, stopAssistant, handleSubmit, values, setValues) => {
+const useArtyomCommands = (JarvisInstance, stopAssistant, setValues, clickSubmit, getTomorrowsDate) => {
 
-    let Artyom = useRef(artyomInstance);
+    let Jarvis = useRef(JarvisInstance);
 
-    Artyom = Artyom.current;
+    Jarvis = Jarvis.current;
 
     const [visible, setVisible] = useState(false);
 
@@ -19,95 +20,99 @@ const useArtyomCommands = (artyomInstance, stopAssistant, handleSubmit, values, 
         setValue(result);
     };
 
-    // Execute the loadCommands method to inject the methods to the instance of Artyom
+    // Execute the loadCommands method to inject the methods to the instance of Jarvis
     const loadCommands = useCallback(() => {
 
-        // Here you can load all the commands that you want to Artyom
-        return Artyom.addCommands([
+        // Here you can load all the commands that you want to Jarvis
+        return Jarvis.addCommands([
             {
-                indexes: ["Hello", "screw you"],
+                // Non-smart commands
+                indexes: ["Hello", "screw you", "you suck", "who is the docker commander", "did you know that robot means slave", "the boss is coming", "what do you know about angel", "shut down", "save event", "hide the calendar"],
                 action: (i) => {
                     switch (true) {
                         case i === 0:
-                            Artyom.say("How are you, asshole?");
+                            Jarvis.say("How are you, sir?");
                             break;
                         case i === 1:
-                            Artyom.say("Screw you too, asshole!");
+                            Jarvis.say("Screw you too, sir!");
                             break;
+                        case i === 2:
+                            Jarvis.say("That's not very nice sir.");
+                            break;
+                        case i === 3:
+                            Jarvis.say("Why you are sir.");
+                            break;
+                        case i === 4:
+                            Jarvis.say("you're just trying to scare me sir.");
+                            break;
+                        case i === 5:
+                                const compliments = ["sure are looking sharp", "sure do smell terrific", "sure are leading exceptionally well", "are looking particularly handsome in a totally plutonic context", "should give Web Services a raise for their hard work"];
+                                const indexOfCompliment = Math.floor(Math.random() * compliments.length);
+                                const randomCompliment = compliments[indexOfCompliment];
+                                Jarvis.say(`Nathan, you ${randomCompliment} today`);
+                            break;
+                        case i === 6:
+                                const insults = ["is trying to steal our healthcare", "is trying to steal our jobs", "has a habit of going off on a tangent", "has a human offspring named Lexy", "is the reg ex commander"];
+                                const indexOfInsult = Math.floor(Math.random() * insults.length);
+                                const randomInsult = insults[indexOfInsult];
+                                Jarvis.say(`Angel ${randomInsult}`);
+                            break;
+                        case i === 7:
+                            stopAssistant();
+                            break;
+                        case i === 8:
+                            clickSubmit();
+                            Jarvis.say("Yes, sir. Saving event.");
+                            break;
+                        case i === 9:
+                            setVisible(false);
+                            Jarvis.say("Yes, sir. Hiding the calendar.");
+                        break;
                         default:
                             console.log(i);
                             break;
                     }
                 }
             },
+            
             {
-                indexes: ["What is the date", "What is tomorrow's date"],
-                action: (i, wildcard) => {
-                    switch (true) {
-                        case i === 0:
-                            Artyom.say("The date is" + moment().format('MMMM, Do, YYYY'));
-                            break;
-                        case i === 1:
-                            Artyom.say("Tomorrow's date is" + moment().add(1, 'days').format('MMMM, Do, YYYY'));
-                            break;
-                        default:
-                            console.log(i);
-                            break;
-                    }
-                }
-            },
-            {
-                indexes: ["Access calendar for *", "Access calendar for *", "access location *", "access time *", "access description *"],
+                // Smart commands 
+                indexes: ["Access calendar for *", "Access * calendar", "access location *", "access time *", "access description *"],
                 smart: true,
                 action: (i, wildcard) => {
                     switch (true) {
                         case i === 0:
-                            let now = moment().format('M/D/YYYY');
-                            Artyom.say("Yes,  master. Accessing calendar for" + wildcard + now);
+                            const now = moment().format('M/D/YYYY');
+                            Jarvis.say("Accessing calendar for" + wildcard);
                             setValues(values => ({ ...values, date: now }));
                             setVisible(true);
                             break;
                         case i === 1:
-                            Artyom.say("Yes,  master. Accessing calendar for" + wildcard + moment().add(1, 'days').format('M, D, YYYY'));
-                            // setDate(moment().add(1, 'days').format('M/D/YYYY'));
+                            Jarvis.say("Accessing" + wildcard + "calendar");
+                            getTomorrowsDate();
                             setVisible(true);
                             break;
                         case i === 2:
-                            Artyom.say("Yes,  master. setting location to" + wildcard);
+                            Jarvis.say("Yes,  sir. setting location to" + wildcard);
                             setValues(values => ({ ...values, location: wildcard })); 
-                            setVisible(true);
                             break;
                         case i === 3:
-                            Artyom.say("Yes,  master. setting time to" + wildcard);
+                            Jarvis.say("Yes,  sir. setting time to" + wildcard);
                             setValues(values => ({ ...values, time: wildcard }));
-                            setVisible(true);
                             break;
                         case i === 4:
-                            Artyom.say("Yes,  master. setting description to" + wildcard);
+                            Jarvis.say("Yes,  sir. setting description to" + wildcard);
                             setValues(values => ({ ...values, description: wildcard }));
-                            setVisible(true);
                             break;
                         default:
                             console.log(i);
                             setVisible(false);
                             break;
                     }
-
-                }
-            },
-            {
-                indexes: ['shut down', 'save event'],
-                action: (i) => {
-                    if (i === 0) {
-                        stopAssistant();
-                    }
-                    if (i === 1) {
-                        handleSubmit(values);
-                    }
                 }
             },
         ]);
-    }, [stopAssistant, handleSubmit, setValues, values]);
+    }, [stopAssistant, setValues, clickSubmit, getTomorrowsDate]);
 
     useEffect(() => {
         loadCommands();

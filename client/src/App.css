@@ -40,3 +40,7 @@
 h2 {
   text-align: center;
 }
+
+.card-header {
+  text-shadow: black 1px 1px 1px;
+}

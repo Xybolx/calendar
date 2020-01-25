@@ -12,6 +12,7 @@ router
 router
     .route("/:id")
     .get(calendarEventsController.findById)
-    .put(calendarEventsController.update);
+    .put(calendarEventsController.update)
+    .delete(calendarEventsController.removeOne);
 
 module.exports = router;
